@@ -2,6 +2,7 @@ import docker
 import subprocess
 import requests
 import time
+import os
 def is_docker_installed():
     try:
         print(subprocess.run(["docker","--version"]))
@@ -23,6 +24,10 @@ def is_docker_installed():
 
     except Exception as e:
         print(e)
+def run_bash_command(continer,command):
+    output=continer.exec_run(command)
+    return output
+
 def is_docker_running():
     try:
         subprocess.run(
@@ -31,24 +36,68 @@ def is_docker_running():
             stderr=subprocess.DEVNULL,
             check=True
         )
+        print("bbb")
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 def create_continer(timeout=45):
     d=False
     for i in range(timeout):
         time.sleep(1)
+        print(i)
         if(is_docker_running()):
+            print("hi")
             d=True
             break
     if(d==True):
         print("111")
         client=docker.from_env()
-        continer=client.containers.run("debian:bookworm-slim","ls",name="linux_test",detach=True)
+        
+        try:
+            client.images.get("my-linux-sandbox:latest")
+            print("Image exists.")
+        except docker.errors.ImageNotFound:
+            print("Image NOT found.")
+            try:
+                image,build_logs=client.images.build(path=os.getcwd(),tag="my-linux-sandbox:latest",rm=True)
+                print("hh")
+            except Exception as e: 
+                print(e)
+                return
+        continer=client.containers.run("my-linux-sandbox:latest","sleep infinity","ls",name="linux_test",detach=True,volumes={(os.getcwd()+r"\mybe_virus"): {"bind": "/samples","mode":"rw"}})
         print("קונטיינר נוצר. ID:", continer)
         print("לוגים ראשוניים:")
         print(continer.logs().decode(errors="ignore"))
-        print("fff")
+        return continer
+        
+        
 
+        
+def run_continer(continer):
+    print(run_bash_command(continer,"cd samples").output.decode())
+    print(run_bash_command(continer,"cwd").output.decode())
+
+    print(run_bash_command(continer,"ls -1").output.decode())
+
+    print(run_bash_command(continer,"Xvfb :500 -screen 0 1280x1024x24 &"))
+    #print(run_bash_command(continer,"wine program.exe &"))
+    output=run_bash_command(continer,"ps -eo comm,pid,pcpu,pmem,args --no-headers")
+    text=str(output.output.decode())
+    lines=text.splitlines()
+    parsed = [line.split() for line in lines]
+    print(parsed)
+    print(run_bash_command(continer,"ls -1"))
+    system_dict={
+        "sleep":1,
+        "ps":1
+
+    }
+    print
+    continer.stop()
+    continer.remove()
+    
 #is_docker_installed()
-create_continer()
+continer=create_continer()
+run_continer(continer)
+ 
