@@ -20,8 +20,6 @@ def is_docker_installed():
             subprocess.Popen(["C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe"])
             return True
             
-
-
     except Exception as e:
         print(e)
 def run_bash_command(continer,command):
@@ -75,8 +73,8 @@ def create_continer(timeout=45):
 
         
 def run_continer(continer):
-    print(run_bash_command(continer,"cd samples").output.decode())
-    print(run_bash_command(continer,"cwd").output.decode())
+    #print(run_bash_command(continer,"-w /samples ls").output.decode())
+    print(continer.exec_run("ls -1",workdir="/samples").output.decode())
 
     print(run_bash_command(continer,"ls -1").output.decode())
 
