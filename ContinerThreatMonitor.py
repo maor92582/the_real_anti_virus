@@ -63,7 +63,16 @@ def create_continer(timeout=45):
             except Exception as e: 
                 print(e)
                 return
-        continer=client.containers.run("my-linux-sandbox:latest","sleep infinity","ls",name="linux_test",detach=True,volumes={(os.getcwd()+r"\mybe_virus"): {"bind": "/samples","mode":"rw"}})
+        while True:
+            try:
+                continer=client.containers.run("my-linux-sandbox:latest","sleep infinity","ls",name="linux_test",detach=True,volumes={(os.getcwd()+r"\mybe_virus"): {"bind": "/samples","mode":"rw"}})
+                break
+            except docker.errors.APIError as e:
+                if "conflict" in str(e):
+                    print("Container with the same name already exists. Removing existing container.")
+                existing_container=client.containers.get("linux_test")
+                existing_container.stop()
+                existing_container.remove()
         print("קונטיינר נוצר. ID:", continer)
         print("לוגים ראשוניים:")
         print(continer.logs().decode(errors="ignore"))
@@ -74,12 +83,14 @@ def create_continer(timeout=45):
         
 def run_continer(continer):
     #print(run_bash_command(continer,"-w /samples ls").output.decode())
-    print(continer.exec_run("ls -1",workdir="/samples").output.decode())
+    viruses=continer.exec_run("ls -1",workdir="/samples").output.decode()
+    print(viruses)
 
     print(run_bash_command(continer,"ls -1").output.decode())
-
-    print(run_bash_command(continer,"Xvfb :500 -screen 0 1280x1024x24 &"))
-    #print(run_bash_command(continer,"wine program.exe &"))
+    continer.exec_run("Xvfb :500 -screen 0 1280x1024x24", detach=True)
+    for virus in viruses.splitlines():
+        continer.exec_run("wine " + str(virus),detach=True,workdir="/samples")
+        print(f"הרצת {virus} בוצעה.")
     output=run_bash_command(continer,"ps -eo comm,pid,pcpu,pmem,args --no-headers")
     text=str(output.output.decode())
     lines=text.splitlines()
@@ -88,10 +99,18 @@ def run_continer(continer):
     print(run_bash_command(continer,"ls -1"))
     system_dict={
         "sleep":1,
-        "ps":1
+        "ps":1,
+        "Xvfb":1
 
     }
-    print
+    for process in parsed:
+       if process[0] not in system_dict:
+           if(float(process[2])>10.0 or float(process[3])>10.0):
+               print(f"תהליך חשוד זוהה: {process}")
+    run_bash_command(continer,"stats --no-stream --all").output.decode()
+       
+
+    
     continer.stop()
     continer.remove()
     
