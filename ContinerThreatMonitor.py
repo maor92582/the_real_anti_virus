@@ -18,10 +18,10 @@ def is_docker_installed():
             subprocess.run(["download.exe","install","--quiet","--accept-license","--backend=wsl-2"])
             print("finish")
             subprocess.Popen(["C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe"])
-            return True
-            
+            return True          
     except Exception as e:
         print(e)
+
 def run_bash_command(continer,command):
     output=continer.exec_run(command)
     return output
@@ -39,13 +39,14 @@ def is_docker_running():
     except Exception as e:
         print(e)
         return False
+
 def create_continer(timeout=45):
     d=False
     for i in range(timeout):
         time.sleep(1)
         print(i)
         if(is_docker_running()):
-            print("hi")
+            print("hi docker is running")
             d=True
             break
     if(d==True):
@@ -76,11 +77,8 @@ def create_continer(timeout=45):
         print("קונטיינר נוצר. ID:", continer)
         print("לוגים ראשוניים:")
         print(continer.logs().decode(errors="ignore"))
-        return continer
-        
-        
-
-        
+        return continer       
+               
 def run_continer(continer):
     #print(run_bash_command(continer,"-w /samples ls").output.decode())
     viruses=continer.exec_run("ls -1",workdir="/samples").output.decode()

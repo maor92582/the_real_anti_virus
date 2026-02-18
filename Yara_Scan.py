@@ -17,7 +17,7 @@ def run_yara(file_path):
                     "webshells_index" in file or
                     "index_w_mobile" in file or
                     "index.yar" in file
-                 ):
+                ):
                     continue
             if "domain.yar" in file or "ip.yar" in file or "url.yar" in file:
                 continue
@@ -25,13 +25,13 @@ def run_yara(file_path):
                 rules=yara.compile(filepath=rulepath)
                 matches = rules.match(filepath=file_path)
             except yara.SyntaxError as e:
-                print(f"⚠️ שגיאה בקובץ חוק: {rulepath}\n   ➜ {e}")
+                print(f" שגיאה בקובץ חוק: {rulepath}\n   ➜ {e}")
                 continue
             except Exception as e:
-                print(f"⚠️ בעיה אחרת בקובץ {rulepath}: {e}")
+                print(f" בעיה אחרת בקובץ {rulepath}: {e}")
                 continue
             if matches:
-                print("🔴 נמצא חוק תואם:")
+                print(" נמצא חוק תואם:")
                 for match in matches:
                     print(f" - {match.rule}")
                     x=True
