@@ -1,4 +1,6 @@
-The Real Anti Virus 🛡️
+                                                                            The Real Anti Virus 🛡️
+
+
 אנטי וירוס לניתוח וזיהוי איומים (Malware Analysis), משלב בדיקות סטטיות ודינמיות בסביבה מבודדת (בפיתוח).
 
 📋 אודות הפרויקט
