@@ -31,6 +31,6 @@
 * **Language:** Python
 * **Virtualization:** Docker (Isolated Environment)
 * **Compatibility:** Wine (Running Windows apps on Linux)
-* **Analysis Tools:** YARA Engine, Hash Verification API
+* **Analysis Tools:** YARA Engine, Hash Verification API,sandbox
 
 
